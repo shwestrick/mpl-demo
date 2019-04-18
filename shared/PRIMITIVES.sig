@@ -27,8 +27,11 @@ sig
    *     x
    *   end
    *)
-  val cas : int ref -> int * int -> int
-  val casArray : int array * int -> int * int -> int
+  val compareAndSwap : int ref -> int * int -> int
+  val arrayCompareAndSwap : int array * int -> int * int -> int
+
+  val fetchAndAdd : int ref -> int -> int
+  val arrayFetchAndAdd : int array * int -> int -> int
 
   (* (if the scheduler supports it) a scheduler hook to perform some load
    * balancing. this can be used as an optimization in long sequential

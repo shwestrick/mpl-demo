@@ -13,8 +13,10 @@ struct
    *)
   val alloc = ForkJoin.alloc
 
-  val cas = MLton.Parallel.compareAndSwap
-  val casArray = MLton.Parallel.arrayCompareAndSwap
+  val compareAndSwap = MLton.Parallel.compareAndSwap
+  val arrayCompareAndSwap = MLton.Parallel.arrayCompareAndSwap
+  val fetchAndAdd = MLton.Parallel.fetchAndAdd
+  val arrayFetchAndAdd = MLton.Parallel.arrayFetchAndAdd
 
   fun arrayUpdateUp (a, i, x) =
     if i < 0 orelse i >= Array.length a then

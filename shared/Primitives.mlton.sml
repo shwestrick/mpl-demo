@@ -11,9 +11,9 @@ struct
    * initialize an array with
    *   MLton.Parallel.Unsafe.arrayUninit
    *)
-  val alloc = ArrayExtra.alloc
+  val alloc = ArrayExtra.arrayUninit
 
-  fun cas r (old, new) =
+  fun compareAndSwap r (old, new) =
     let
       val x = !r
       val _ = if x = old then r := new else ()
@@ -21,12 +21,28 @@ struct
       x
     end
 
-  fun casArray (a, i) (old, new) =
+  fun arrayCompareAndSwap (a, i) (old, new) =
     let
       val x = Array.sub (a, i)
       val _ = if x = old then Array.update (a, i, new) else ()
     in
       x
+    end
+
+  fun fetchAndAdd r x =
+    let
+      val c = !r
+    in
+      r := c+x;
+      c
+    end
+
+  fun arrayFetchAndAdd (a, i) x =
+    let
+      val c = Array.sub (a, i)
+    in
+      Array.update (a, i, c+x);
+      c
     end
 
   val arrayUpdateUp = Array.update

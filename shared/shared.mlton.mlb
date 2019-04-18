@@ -4,7 +4,16 @@ $(SML_LIB)/basis/unsafe.mlb
 
 PRIMITIVES.sig
 
-Primitives.mlton.sml
+local
+  local
+    $(SML_LIB)/basis/build/sources.mlb
+  in
+    structure ArrayExtra = Array
+    structure ArraySliceExtra = ArraySlice
+  end
+in
+  Primitives.mlton.sml
+end
 
 MapScan.sml
 Util.sml
