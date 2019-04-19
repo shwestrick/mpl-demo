@@ -11,5 +11,6 @@ in
 end
 
 MapScan.sml
+ArraySequence.sml
 Util.sml
 CommandLineArgs.sml
