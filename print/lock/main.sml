@@ -1,26 +1,14 @@
-type lock = int ref
-
-fun newLock () = ref 0
-
-fun takeLock r =
-  if (Primitives.compareAndSwap r (0, 1) = 0)
-  then ()
-  else takeLock r
-
-fun releaseLock r =
-  (r := 0)
-
 fun drseuss n =
   let
-    val m = newLock ()
+    val m = Mutex.new ()
   in
     Primitives.parfor 1 (0, n) (fn _ =>
-      (takeLock m;
+      (Mutex.lock m;
        print "i am sam, ";
        print "sam i am. ";
        print "do you like ";
        print "green eggs and ham?\n";
-       releaseLock m))
+       Mutex.unlock m))
   end
 
 structure CLA = CommandLineArgs
