@@ -16,6 +16,9 @@ sig
   val pow2 : int -> int
   val log2 : int -> int
 
+  val isOdd : int -> bool
+  val isEven : int -> bool
+
   (* `boundPow2 n` returns the smallest power of 2 `b` such that `n <= b` *)
   val boundPow2 : int -> int
 
@@ -171,6 +174,11 @@ struct
     in
       Word64.toInt (v andb intMask)
     end
+
+  fun isEven x =
+    Word.andb (0w1, Word.fromInt x) = 0w0
+  fun isOdd x =
+    Word.andb (0w1, Word.fromInt x) = 0w1
 
   fun charbit w i =
     if Word64.andb (Word64.>> (w, Word.fromInt i), 0w1) = 0w0 then #"0" else #"1"
