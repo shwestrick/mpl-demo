@@ -1,5 +1,8 @@
 structure A : PAR_ARRAY =
 struct
+
+  structure AS = ArraySlice
+
   type 'a t = 'a array
 
   val allocate = Primitives.alloc
@@ -69,6 +72,51 @@ struct
 
   val scanGrain = 4096
 
+  datatype 'a rtree = Node of 'a * 'a rtree * 'a rtree | Leaf of 'a
+  fun rval (Node (rv, _, _)) = rv
+    | rval (Leaf rv) = rv
+
+  fun scan f b a =
+    let
+      fun upsweep s =
+        if AS.length s <= scanGrain then
+          Leaf (AS.foldl f b s)
+        else
+          let
+            val n = AS.length s
+            val half = n div 2
+            val (l, r) =
+              Primitives.par (fn _ => upsweep (AS.subslice (s, 0, SOME half)),
+                              fn _ => upsweep (AS.subslice (s, half, NONE)))
+          in
+            Node (f (rval l, rval r), l, r)
+          end
+
+      val tree = upsweep (AS.full a)
+      val total = rval tree
+      val result = allocate (length a)
+
+      fun downsweep b t lo hi =
+        case t of
+          Leaf _ =>
+            (Primitives.loop (lo, hi) b (fn (b, i) =>
+               (set result (i, b); f (b, get a i)));
+             ())
+        | Node (_, l, r) =>
+            let
+              val mid = lo + (hi - lo) div 2
+            in
+              Primitives.par (fn _ => downsweep b l lo mid,
+                              fn _ => downsweep (f (b, rval l)) r mid hi);
+              ()
+            end
+
+      val _ = downsweep b tree 0 (length a)
+    in
+      (result, total)
+    end
+
+(*
   fun scan f b a =
     if length a <= scanGrain then
       seqScan f b a
@@ -105,6 +153,7 @@ struct
       in
         (r, t)
       end
+*)
 
   val filterGrain = 4096
 
