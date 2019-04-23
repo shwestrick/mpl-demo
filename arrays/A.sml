@@ -70,29 +70,30 @@ struct
       (r, loop b 0)
     end
 
-  val scanGrain = 4096
-
   datatype 'a rtree = Node of 'a * 'a rtree * 'a rtree | Leaf of 'a
   fun rval (Node (rv, _, _)) = rv
     | rval (Leaf rv) = rv
 
+  (* map f on s and combine with g (identity b) *)
+  fun upsweep grain (f : 'a -> 'b) (g : 'b * 'b -> 'b) (b : 'b) (s : 'a AS.slice) =
+    if AS.length s <= grain then
+      Leaf (AS.foldl (fn (x, b) => g (b, f x)) b s)
+    else
+      let
+        val n = AS.length s
+        val half = n div 2
+        val (l, r) = Primitives.par
+          (fn _ => upsweep grain f g b (AS.subslice (s, 0, SOME half)),
+           fn _ => upsweep grain f g b (AS.subslice (s, half, NONE)))
+      in
+        Node (g (rval l, rval r), l, r)
+      end
+
+  val scanGrain = 4096
+
   fun scan f b a =
     let
-      fun upsweep s =
-        if AS.length s <= scanGrain then
-          Leaf (AS.foldl f b s)
-        else
-          let
-            val n = AS.length s
-            val half = n div 2
-            val (l, r) =
-              Primitives.par (fn _ => upsweep (AS.subslice (s, 0, SOME half)),
-                              fn _ => upsweep (AS.subslice (s, half, NONE)))
-          in
-            Node (f (rval l, rval r), l, r)
-          end
-
-      val tree = upsweep (AS.full a)
+      val tree = upsweep scanGrain (fn x => x) f b (AS.full a)
       val total = rval tree
       val result = allocate (length a)
 
@@ -159,6 +160,42 @@ struct
 
   fun filter p a =
     let
+      fun c x = if p x then 1 else 0
+      val tree = upsweep filterGrain c op+ 0 (AS.full a)
+      val count = rval tree
+
+      val output = allocate count
+
+      fun downsweep offset t lo hi =
+        case t of
+          Leaf _ =>
+            (Primitives.loop (lo, hi) offset (fn (off, i) =>
+               let
+                 val x = get a i
+               in
+                 if p x then
+                   (set output (off, x); off+1)
+                 else
+                   off
+               end);
+             ())
+        | Node (_, l, r) =>
+            let
+              val mid = lo + (hi - lo) div 2
+              val offset' = offset + rval l
+            in
+              Primitives.par (fn _ => downsweep offset l lo mid,
+                              fn _ => downsweep offset' r mid hi);
+              ()
+            end
+
+      val _ = downsweep 0 tree 0 (length a)
+    in
+      output
+    end
+(*
+  fun filter p a =
+    let
       val n = length a
       val nb = 1 + (n-1) div filterGrain
 
@@ -197,5 +234,6 @@ struct
     in
       result
     end
+ *)
 
 end
