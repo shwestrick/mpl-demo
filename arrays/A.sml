@@ -93,7 +93,26 @@ struct
 
   fun scan f b a =
     let
-      val tree = upsweep scanGrain (fn x => x) f b (AS.full a)
+      fun upsweep s =
+        if AS.length s <= scanGrain then
+          let
+            val (a, k, n) = AS.base s
+          in
+            Leaf (Primitives.loop (k, k+n) b (fn (b, i) => f (b, get a i)))
+          end
+        else
+          let
+            val n = AS.length s
+            val half = n div 2
+            val (l, r) = Primitives.par
+              (fn _ => upsweep (AS.subslice (s, 0, SOME half)),
+               fn _ => upsweep (AS.subslice (s, half, NONE)))
+          in
+            Node (f (rval l, rval r), l, r)
+          end
+
+      val tree = upsweep (AS.full a)
+
       val total = rval tree
       val result = allocate (length a)
 
