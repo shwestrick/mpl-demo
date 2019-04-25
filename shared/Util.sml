@@ -30,7 +30,8 @@ sig
   val tick : timer -> string -> timer
 
   val timeOnce : (unit -> 'a) -> 'a * real
-  val timeMany : int -> (unit -> 'a) -> 'a list * real list
+  val timeOnceWithPercentGC : (unit -> 'a) -> 'a * real * real
+  val timeMany : bool -> int -> (unit -> 'a) -> 'a list * real list
 
   val realSum : real list -> real
   val realAvg : real list -> real
@@ -110,6 +111,27 @@ struct
     ; OS.Process.exit OS.Process.failure
     )
 
+  fun realToString decDigits r =
+    Real.fmt (StringCvt.FIX (SOME decDigits)) r
+
+  fun timeOnceWithPercentGC f =
+    let
+      val t0 = Time.now ()
+      val gc0 = Primitives.getGCTime ()
+      val result = f ()
+      val gc1 = Primitives.getGCTime ()
+      val t1 = Time.now ()
+
+      val elapsed = Time.toReal (Time.- (t1, t0))
+      val nproc = Vector.length gc0
+      val gc = Vector.tabulate (nproc, fn p =>
+        Time.toReal (Time.- (Vector.sub (gc1, p), Vector.sub (gc0, p))))
+      val gcAvg = (Vector.foldl op+ 0.0 gc) / (Real.fromInt nproc)
+      val gcPercent = 100.0 * gcAvg / elapsed
+    in
+      (result, elapsed, gcPercent)
+    end
+
   fun timeOnce f =
     let
       val t0 = Time.now ()
@@ -119,10 +141,12 @@ struct
       (result, Time.toReal (Time.- (t1, t0)))
     end
 
-  fun timeMany k f =
-    Primitives.loop (0, k) ([], []) (fn ((results, times), _) =>
+  fun timeMany reportGC k f =
+    Primitives.loop (0, k) ([], []) (fn ((results, times), i) =>
       let
-        val (result, elapsed) = timeOnce f
+        val (result, elapsed, pgc) = timeOnceWithPercentGC f
+        val _ = print ("time" ^ Int.toString i ^ "  " ^ realToString 3 elapsed ^ "s")
+        val _ = print (if not reportGC then "\n" else " (" ^ realToString 0 pgc ^ "% gc)\n")
       in
         (result :: results, elapsed :: times)
       end)
@@ -131,9 +155,6 @@ struct
   fun realAvg rs = (realSum rs) / Real.fromInt (List.length rs)
   fun realMin rs = List.foldr Real.min Real.posInf rs
   fun realMax rs = List.foldr Real.max Real.negInf rs
-
-  fun realToString decDigits r =
-    Real.fmt (StringCvt.FIX (SOME decDigits)) r
 
   fun listToString f xs =
     "[" ^ String.concatWith "," (List.map f xs) ^ "]"

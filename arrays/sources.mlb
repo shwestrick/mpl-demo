@@ -1,7 +1,10 @@
 ../shared/shared.$(COMPILER).mlb
 PAR_ARRAY.sig
 A.sml
+tabulate-no-gran.sml
 tabulate.sml
+filter-contract.sml
+filter-up-down-no-gran.sml
+filter-up-down.sml
 scan.sml
-filter.sml
 main.sml

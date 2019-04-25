@@ -2,6 +2,7 @@ signature PRIMITIVES =
 sig
 
   val numberOfProcessors : int
+  val getGCTime : unit -> Time.time vector
 
   val par : (unit -> 'a) * (unit -> 'b) -> ('a * 'b)
   val par3 : (unit -> 'a) * (unit -> 'b) * (unit -> 'c) -> ('a * 'b * 'c)

@@ -3,6 +3,8 @@ structure CLA = CommandLineArgs
 val sizeStr = CLA.parseString "N" "1B"
 val funcName = CLA.parseString "func" "tabulate"
 val doCheck = CLA.parseBool "check" false
+val runs = CLA.parseInt "runs" 3
+val reportGC = CLA.parseBool "reportgc" false
 
 val N =
   case Int.fromString sizeStr of
@@ -27,69 +29,71 @@ fun check f =
      else
        print ("incorrect\n"))
 
-fun ptm tm =
-  print ("time   " ^ Util.realToString 3 tm ^ "s\n")
+(* fun ptm tm =
+  print ("time   " ^ Util.realToString 3 tm ^ "s\n") *)
+
+fun doit f =
+  let
+    val (rs, tms) = Util.timeMany reportGC runs f
+  in
+    List.hd rs
+  end
 
 val _ =
   case funcName of
     "tabulate" =>
       let
         fun elem i = i
-        val (r, tm) = Util.timeOnce (fn _ => tabulate elem N)
+        val r = doit (fn _ => tabulate elem N)
       in
-        ptm tm;
         check (fn _ => A.equal op= (r, A.tabulate elem N))
       end
 
-  | "ref-tabulate" =>
+  | "tabulate-no-gran" =>
       let
         fun elem i = i
-        val (r, tm) = Util.timeOnce (fn _ => A.tabulate elem N)
+        val r = doit (fn _ => tabulateNoGran elem N)
       in
-        ptm tm;
-        check (fn _ => true) (* :) *)
+        check (fn _ => A.equal op= (r, A.tabulate elem N))
       end
 
   | "scan" =>
       let
         fun elem i = 1
         val input = A.tabulate elem N
-        val ((r, t), tm) = Util.timeOnce (fn _ => scan op+ 0 input)
+        val (r, t) = doit (fn _ => scan op+ 0 input)
       in
-        ptm tm;
         check (fn _ => t = N andalso A.equal op= (r, A.tabulate (fn i => i) N))
       end
 
-  | "ref-scan" =>
-      let
-        fun elem i = 1
-        val input = A.tabulate elem N
-        val ((r, t), tm) = Util.timeOnce (fn _ => A.scan op+ 0 input)
-      in
-        ptm tm;
-        check (fn _ => t = N andalso A.equal op= (r, A.tabulate (fn i => i) N))
-      end
-
-  | "filter" =>
+  | "filter-up-down-no-gran" =>
       let
         fun elem i = (Util.hash i mod N)
         fun keep x = Util.isEven x
         val input = A.tabulate elem N
-        val (r, tm) = Util.timeOnce (fn _ => filter keep input)
+        val r = doit (fn _ => filterUpDownNoGran keep input)
       in
-        ptm tm;
-        check (fn _ => A.equal op= (r, A.filter keep input))
+        check (fn _ => A.equal op= (r, A.filter keep input)) (* :) *)
       end
 
-  | "ref-filter" =>
+  | "filter-up-down" =>
       let
         fun elem i = (Util.hash i mod N)
         fun keep x = Util.isEven x
         val input = A.tabulate elem N
-        val (r, tm) = Util.timeOnce (fn _ => A.filter keep input)
+        val r = doit (fn _ => filterUpDown keep input)
       in
-        ptm tm;
-        check (fn _ => true) (* :) *)
+        check (fn _ => A.equal op= (r, A.filter keep input)) (* :) *)
+      end
+
+  | "filter-contract" =>
+      let
+        fun elem i = (Util.hash i mod N)
+        fun keep x = Util.isEven x
+        val input = A.tabulate elem N
+        val r = doit (fn _ => filterContract keep input)
+      in
+        check (fn _ => A.equal op= (r, A.filter keep input)) (* :) *)
       end
 
   | other => Util.die ("unknown func name " ^ other)

@@ -5,6 +5,13 @@ struct
 
   val numberOfProcessors = MLton.Parallel.numberOfProcessors
 
+  val _ = MLton.Rusage.measureGC true
+
+  fun getGCTime () =
+    Vector.tabulate (numberOfProcessors, fn p =>
+      Time.+ (MLton.GC.Statistics.localGCTimeOfProc p,
+              MLton.GC.Statistics.promoTimeOfProc p))
+
   val par = ForkJoin.fork
 
   (* ForkJoin.alloc is parallelized. Alternatively we can sequentially
