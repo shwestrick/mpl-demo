@@ -3,8 +3,8 @@ MPL=/afs/cs/academic/class/15210-s17/mpl-flat/build/bin/mpl -mlb-path-var "COMPI
 MLTON=mlton -mlb-path-var "COMPILER mlton"
 FLAGS=-default-type int64
 
-.PHONY: run run.mlton
-run:
+.PHONY: run.mpl run.mlton
+run.mpl:
 	$(MPL) $(FLAGS) -output $@ sources.mlb
 
 run.mlton:
