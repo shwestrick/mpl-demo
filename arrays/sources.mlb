@@ -3,8 +3,11 @@ PAR_ARRAY.sig
 A.sml
 tabulate-no-gran.sml
 tabulate.sml
+filter-simple.sml
 filter-contract.sml
 filter-up-down-no-gran.sml
 filter-up-down.sml
-scan.sml
+scan-contract-no-gran.sml
+scan-contract.sml
+scan-up-down.sml
 main.sml

@@ -57,13 +57,41 @@ val _ =
         check (fn _ => A.equal op= (r, A.tabulate elem N))
       end
 
-  | "scan" =>
+  | "scan-contract-no-gran" =>
       let
         fun elem i = 1
         val input = A.tabulate elem N
-        val (r, t) = doit (fn _ => scan op+ 0 input)
+        val (r, t) = doit (fn _ => scanContractNoGran op+ 0 input)
       in
         check (fn _ => t = N andalso A.equal op= (r, A.tabulate (fn i => i) N))
+      end
+
+  | "scan-contract" =>
+      let
+        fun elem i = 1
+        val input = A.tabulate elem N
+        val (r, t) = doit (fn _ => scanContract op+ 0 input)
+      in
+        check (fn _ => t = N andalso A.equal op= (r, A.tabulate (fn i => i) N))
+      end
+
+  | "scan-up-down" =>
+      let
+        fun elem i = 1
+        val input = A.tabulate elem N
+        val (r, t) = doit (fn _ => scanUpDown op+ 0 input)
+      in
+        check (fn _ => t = N andalso A.equal op= (r, A.tabulate (fn i => i) N))
+      end
+
+  | "filter-simple" =>
+      let
+        fun elem i = (Util.hash i mod N)
+        fun keep x = Util.isEven x
+        val input = A.tabulate elem N
+        val r = doit (fn _ => filterSimple keep input)
+      in
+        check (fn _ => A.equal op= (r, A.filter keep input)) (* :) *)
       end
 
   | "filter-up-down-no-gran" =>
