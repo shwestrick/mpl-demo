@@ -57,6 +57,22 @@ val _ =
         check (fn _ => A.equal op= (r, A.tabulate elem N))
       end
 
+  | "tabulate-bad-gran" =>
+      let
+        fun elem i = i
+        val r = doit (fn _ => tabulateBadGran elem N)
+      in
+        check (fn _ => A.equal op= (r, A.tabulate elem N))
+      end
+
+  | "tabulate-gran-elision" =>
+      let
+        fun elem i = i
+        val r = doit (fn _ => tabulateGranElision elem N)
+      in
+        check (fn _ => A.equal op= (r, A.tabulate elem N))
+      end
+
   | "scan-contract-no-gran" =>
       let
         fun elem i = 1

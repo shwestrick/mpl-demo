@@ -2,6 +2,8 @@
 PAR_ARRAY.sig
 A.sml
 tabulate-no-gran.sml
+tabulate-bad-gran.sml
+tabulate-gran-elision.sml
 tabulate.sml
 filter-simple.sml
 filter-contract.sml
