@@ -5,6 +5,7 @@ tabulate-no-gran.sml
 tabulate-bad-gran.sml
 tabulate-gran-elision.sml
 tabulate.sml
+reduce.sml
 filter-simple.sml
 filter-contract.sml
 filter-up-down-no-gran.sml

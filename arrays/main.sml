@@ -73,6 +73,15 @@ val _ =
         check (fn _ => A.equal op= (r, A.tabulate elem N))
       end
 
+  | "reduce" =>
+      let
+        fun elem i = 1
+        val input = A.tabulate elem N
+        val r = doit (fn _ => reduce op+ 0 input)
+      in
+        check (fn _ => r = A.reduce op+ 0 input)
+      end
+
   | "scan-contract-no-gran" =>
       let
         fun elem i = 1
