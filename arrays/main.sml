@@ -151,4 +151,22 @@ val _ =
         check (fn _ => A.equal op= (r, A.filter keep input)) (* :) *)
       end
 
+  | "inject" =>
+      let
+        fun elem i = (Util.hash i mod N, i)
+        val updates = A.tabulate elem N
+        val input = A.tabulate (fn _ => ~1) N
+        val r = doit (fn _ => inject input updates)
+
+        fun checkIdx i =
+          let
+            val x = A.get r i
+          in
+            x < 0 orelse (i = Util.hash x mod N)
+          end
+      in
+        check (fn _ => A.reduce (fn (a, b) => a andalso b) true
+          (A.tabulate checkIdx N))
+      end
+
   | other => Util.die ("unknown func name " ^ other)

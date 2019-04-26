@@ -13,4 +13,5 @@ filter-up-down.sml
 scan-contract-no-gran.sml
 scan-contract.sml
 scan-up-down.sml
+inject.sml
 main.sml
