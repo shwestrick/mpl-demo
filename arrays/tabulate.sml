@@ -21,7 +21,7 @@ fun tabulate f n =
   let
     val a = allocate n
   in
-    parfor 4096 (0, n) (fn i => set a (i, f i));
+    parfor 16384 (0, n) (fn i => set a (i, f i));
     a
   end
 

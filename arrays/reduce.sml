@@ -4,7 +4,7 @@ open A
 val par = Primitives.par
 val loop = Primitives.loop
 
-val reduceGrain = 4096
+val reduceGrain = 16384
 
 in
 

@@ -4,7 +4,7 @@ open A
 val parfor = Primitives.parfor
 val loop = Primitives.loop
 
-val filterGrain = 4096
+val filterGrain = 16384
 
 in
 

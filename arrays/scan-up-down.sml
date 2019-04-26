@@ -8,7 +8,7 @@ datatype 'a rtree = Leaf of 'a | Node of 'a * 'a rtree * 'a rtree
 fun rval (Node (rv, _, _)) = rv
   | rval (Leaf rv) = rv
 
-val scanGrain = 4096
+val scanGrain = 8192
 
 in
 

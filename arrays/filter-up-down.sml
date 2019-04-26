@@ -9,7 +9,7 @@ datatype 'a rtree = Leaf of 'a | Node of 'a * 'a rtree * 'a rtree
 fun rval (Node (rv, _, _)) = rv
   | rval (Leaf rv) = rv
 
-val filterGrain = 4096
+val filterGrain = 16384
 
 in
 

@@ -4,7 +4,7 @@ open A
 val parfor = Primitives.parfor
 val loop = Primitives.loop
 
-val scanGrain = 4096
+val scanGrain = 8192
 
 in
 

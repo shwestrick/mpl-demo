@@ -35,6 +35,8 @@ fun check f =
 fun doit f =
   let
     val (rs, tms) = Util.timeMany reportGC runs f
+    val avgTm = Util.realAvg tms
+    val _ = print ("avg    " ^ Util.realToString 3 avgTm ^ "s\n")
   in
     List.hd rs
   end
