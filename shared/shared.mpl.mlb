@@ -12,5 +12,7 @@ end
 
 MapScan.sml
 ArraySequence.sml
+INT_ARRAY_SLICE.sig
+IntArraySlice.sml
 Util.sml
 CommandLineArgs.sml
